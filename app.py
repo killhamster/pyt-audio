@@ -7,6 +7,7 @@ import moviepy.editor as mp
 from urllib.parse import urlparse
 import datetime
 import tempfile
+from slugify import slugify
 
 vid_url = ""
 yt = None
@@ -67,7 +68,7 @@ class AppFrame ( wx.Frame ):
 
         main_fgsizer.Add( infobox_sizer, 1, wx.EXPAND, 5 )
 
-        self.save_button = wx.Button( self, wx.ID_ANY, u"Save As...", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.save_button = wx.Button( self, wx.ID_ANY, u"Save", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.save_button.SetMinSize( wx.Size( 120,-1 ) )
         self.save_button.Disable()
         self.save_button.Bind(wx.EVT_BUTTON, self.SaveClick)
@@ -115,12 +116,12 @@ class AppFrame ( wx.Frame ):
             os.makedirs(self.default_save_dir)
         try:
             temp_audio = (yt.streams.filter(only_audio=True).first().download(output_path = tempfile.gettempdir()))
-            default_file = video_title + ".wav"
+            default_file = slugify(video_title) + ".wav"
             audio = mp.AudioFileClip(temp_audio)
             audio.write_audiofile(os.path.join(self.default_save_dir, default_file))
             self.save_button.Disable()
         except IOError:
-            msg = "Cannot save current data in file '%s'." % self.save_dir
+            msg = "Cannot save current data in file '%s'." % self.default_save_dir
             self.ErrorPop(msg)
 
     def __del__( self ):
